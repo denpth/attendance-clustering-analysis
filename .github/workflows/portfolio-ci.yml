@@ -1,0 +1,18 @@
+name: Notebook CI
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate notebook and publication boundary
+        run: |
+          python - <<'PYCODE'
+          import json
+          from pathlib import Path
+          notebook = json.loads(Path('School_Attendance_Dataset_Analysis.ipynb').read_text())
+          assert notebook.get('cells')
+          assert all(not cell.get('outputs') for cell in notebook['cells'])
+          assert not Path('School_Attendance_dataset.csv').exists()
+          print('Notebook structure and excluded dataset verified; no model evaluation claimed.')
+          PYCODE
